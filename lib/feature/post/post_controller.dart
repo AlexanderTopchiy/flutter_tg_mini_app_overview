@@ -2,9 +2,18 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter_tg_mini_app_overview/feature/post/post.dart';
+import 'package:telegram_web_app/telegram_web_app.dart';
 
 class PostController {
-  const PostController();
+  const PostController({
+    required this.telegram,
+  });
+
+  final TelegramWebApp telegram;
+
+  Future<void> init() async {
+    await telegram.ready();
+  }
 
   Future<List<Post>> fetchPosts() async {
     try {

@@ -17,10 +17,23 @@ class PostScreen extends StatefulWidget {
 
 class _PostScreenState extends State<PostScreen> {
   @override
+  void initState() {
+    super.initState();
+    widget.postController.init();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: widget.postController.telegram.backgroundColor,
       appBar: AppBar(
         title: const Text('Posts'),
+        actions: [
+          IconButton(
+            onPressed: widget.postController.telegram.expand,
+            icon: const Icon(Icons.expand),
+          ),
+        ],
       ),
       body: FutureBuilder<List<Post>>(
         future: widget.postController.fetchPosts(),
