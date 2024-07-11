@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/post_controller.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/post_screen.dart';
 
 class TgMiniApp extends StatelessWidget {
   const TgMiniApp({super.key});
@@ -6,10 +8,9 @@ class TgMiniApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+      title: 'Telegram Mini App using Flutter',
+      home: PostScreen(
+        postController: PostController(),
       ),
     );
   }
