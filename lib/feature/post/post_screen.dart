@@ -25,15 +25,8 @@ class _PostScreenState extends State<PostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: widget.postController.telegram.backgroundColor,
       appBar: AppBar(
         title: const Text('Posts'),
-        actions: [
-          IconButton(
-            onPressed: widget.postController.telegram.expand,
-            icon: const Icon(Icons.expand),
-          ),
-        ],
       ),
       body: FutureBuilder<List<Post>>(
         future: widget.postController.fetchPosts(),
@@ -42,7 +35,18 @@ class _PostScreenState extends State<PostScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Column(
+                children: [
+                  Text('Error: ${snapshot.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _refreshPosts,
+                    child: const Text('Refresh'),
+                  ),
+                ],
+              ),
+            );
           }
           if (snapshot.hasData) {
             return ScrollConfiguration(
@@ -54,19 +58,16 @@ class _PostScreenState extends State<PostScreen> {
                   PointerDeviceKind.trackpad,
                 },
               ),
-              child: RefreshIndicator(
-                onRefresh: _refreshPosts,
-                child: ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final item = snapshot.data![index];
+              child: ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  final item = snapshot.data![index];
 
-                    return ListTile(
-                      title: Text(item.title),
-                      subtitle: Text(item.body),
-                    );
-                  },
-                ),
+                  return ListTile(
+                    title: Text(item.title),
+                    subtitle: Text(item.body),
+                  );
+                },
               ),
             );
           }
