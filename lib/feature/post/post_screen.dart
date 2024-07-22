@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tg_mini_app_overview/feature/post/post.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/message.dart';
 import 'package:flutter_tg_mini_app_overview/feature/post/post_controller.dart';
 
 class PostScreen extends StatefulWidget {
@@ -26,10 +26,10 @@ class _PostScreenState extends State<PostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Posts'),
+        title: const Text('Messages'),
       ),
-      body: FutureBuilder<List<Post>>(
-        future: widget.postController.fetchPosts(),
+      body: FutureBuilder<List<Message>>(
+        future: widget.postController.fetchMessages(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -49,6 +49,12 @@ class _PostScreenState extends State<PostScreen> {
             );
           }
           if (snapshot.hasData) {
+            if (snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text('No messages yet'),
+              );
+            }
+            
             return ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
                 physics: const BouncingScrollPhysics(),
@@ -64,8 +70,8 @@ class _PostScreenState extends State<PostScreen> {
                   final item = snapshot.data![index];
 
                   return ListTile(
-                    title: Text(item.title),
-                    subtitle: Text(item.body),
+                    title: Text(item.messageText),
+                    subtitle: Text('${item.timestamp}'),
                   );
                 },
               ),

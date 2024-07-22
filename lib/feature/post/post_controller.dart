@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_tg_mini_app_overview/feature/post/message.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_tg_mini_app_overview/feature/post/post.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
@@ -19,6 +20,7 @@ class PostController {
     await _expandAppInitially();
   }
 
+  @Deprecated('Using Messages instead')
   Future<List<Post>> fetchPosts() async {
     try {
       final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
@@ -32,6 +34,21 @@ class PostController {
       }
     } catch (error) {
       throw Exception('Failed to load posts: $error');
+    }
+  }
+
+  Future<List<Message>> fetchMessages() async {
+    try {
+      const tgBotToken = String.fromEnvironment('TG_BOT_TOKEN');
+      final response = await http.get(Uri.parse('https://api.telegram.org/bot$tgBotToken/getUpdates'));
+
+      if (response.statusCode == 200) {
+        return Message.fromJsonList(json.decode(response.body));
+      } else {
+        throw Exception('Failed to load messages');
+      }
+    } catch (error) {
+      throw Exception('Failed to load messages: $error');
     }
   }
 
