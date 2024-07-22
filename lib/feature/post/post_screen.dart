@@ -27,6 +27,12 @@ class _PostScreenState extends State<PostScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Messages'),
+        actions: [
+          IconButton(
+            onPressed: _refreshPosts,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: FutureBuilder<List<Message>>(
         future: widget.postController.fetchMessages(),
@@ -54,7 +60,7 @@ class _PostScreenState extends State<PostScreen> {
                 child: Text('No messages yet'),
               );
             }
-            
+
             return ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
                 physics: const BouncingScrollPhysics(),
