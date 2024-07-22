@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -27,14 +28,49 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>flutter_tg_mini_app_overview</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <script src="flutter_bootstrap.js" async></script>
   <!-- Telegram Web App-->
   <script src="https://telegram.org/js/telegram-web-app.js" defer=""></script>
+  <!-- Solution to set particular Bot API version - https://stackoverflow.com/a/78771303 -->
+  <script>
+    function sessionStorageSet(key, value) {
+      try {
+        window.sessionStorage.setItem('__telegram__' + key, JSON.stringify(value));
+        return true;
+      } catch (e) { }
+      return false;
+    }
+
+    function sessionStorageGet(key) {
+      try {
+        return JSON.parse(window.sessionStorage.getItem('__telegram__' + key));
+      } catch (e) { }
+      return null;
+    }
+
+    // Should be String, not just number
+    let appTgVersion = '7.7'; // https://core.telegram.org/bots/webapps#july-7-2024
+
+    var initParams = sessionStorageGet('initParams');
+    if (initParams) {
+      if (!initParams.tgWebAppVersion) {
+        initParams.tgWebAppVersion = appTgVersion;
+      }
+    } else {
+      initParams = {
+        tgWebAppVersion: appTgVersion
+      };
+    }
+
+    sessionStorageSet('initParams', initParams);
+  </script>
 </body>
+
 </html>

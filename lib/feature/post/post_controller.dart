@@ -12,7 +12,11 @@ class PostController {
   final TelegramWebApp telegram;
 
   Future<void> init() async {
+    print('Bot API version: ${telegram.version}');
     await telegram.ready();
+
+    await _disableClosingSwipe();
+    await _expandAppInitially();
   }
 
   Future<List<Post>> fetchPosts() async {
@@ -28,6 +32,24 @@ class PostController {
       }
     } catch (error) {
       throw Exception('Failed to load posts: $error');
+    }
+  }
+
+  Future<void> _disableClosingSwipe() async {
+    print('isVerticalSwipesEnabled - before: ${telegram.isVerticalSwipesEnabled}');
+    if (telegram.isVerticalSwipesEnabled) {
+      // Without disabling it, page scroll may has conflicts with swipe-to-close-tma gesture
+      await telegram.disableVerticalSwipes();
+      print('isVerticalSwipesEnabled - after: ${telegram.isVerticalSwipesEnabled}');
+    }
+  }
+
+  Future<void> _expandAppInitially() async {
+    print('isExpanded - before: ${telegram.isExpanded}');
+    if (!telegram.isExpanded) {
+      // Expand app initially
+      await telegram.expand();
+      print('isExpanded - after: ${telegram.isExpanded}');
     }
   }
 }
