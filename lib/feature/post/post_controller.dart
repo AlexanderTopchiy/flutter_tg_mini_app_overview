@@ -1,8 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter_tg_mini_app_overview/feature/post/message.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/models/message.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/models/updates.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/models/post.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_tg_mini_app_overview/feature/post/post.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 class PostController {
@@ -20,30 +22,34 @@ class PostController {
     await _expandAppInitially();
   }
 
-  @Deprecated('Using Messages instead')
-  Future<List<Post>> fetchPosts() async {
+  Future<List<Updates>> fetchUpdates() async {
     try {
-      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
-
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body) as List<dynamic>;
-
-        return jsonResponse.map((post) => Post.fromJson(post as Map<String, dynamic>)).toList();
-      } else {
-        throw Exception('Failed to load posts');
-      }
-    } catch (error) {
-      throw Exception('Failed to load posts: $error');
-    }
-  }
-
-  Future<List<Message>> fetchMessages() async {
-    try {
-      const tgBotToken = String.fromEnvironment('TG_BOT_TOKEN');
+      final tgBotToken = dotenv.env['TG_BOT_TOKEN'];
       final response = await http.get(Uri.parse('https://api.telegram.org/bot$tgBotToken/getUpdates'));
 
       if (response.statusCode == 200) {
-        return Message.fromJsonList(json.decode(response.body));
+        final jsonBody = json.decode(response.body);
+        final updates = jsonBody['result'] as List;
+
+        if (updates.isEmpty) {
+          return [];
+        }
+
+        final messages = updates //
+            .where((x) => x.containsKey('message')) //
+            .toList() //
+            .map((y) => Message.fromJson(y)) //
+            .toList();
+
+        final posts = updates //
+            .where((x) => x.containsKey('channel_post')) //
+            .toList() //
+            .map((y) => Post.fromJson(y)) //
+            .toList();
+
+        final updatesList = <Updates>[...messages, ...posts];
+
+        return updatesList;
       } else {
         throw Exception('Failed to load messages');
       }

@@ -7,5 +7,5 @@ During implementation, some things were simplified to reduce complexity.
 ## Deploy 🚀
 
 * `firebase login`
-* `fvm flutter build web --release --dart-define=TG_BOT_TOKEN=<your bot token>`
+* `fvm flutter build web --release`
 * `firebase deploy`

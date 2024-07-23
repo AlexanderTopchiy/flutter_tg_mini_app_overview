@@ -1,7 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tg_mini_app_overview/feature/post/message.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/models/updates.dart';
 import 'package:flutter_tg_mini_app_overview/feature/post/post_controller.dart';
+import 'package:flutter_tg_mini_app_overview/feature/post/widgets/refresh_button.dart';
 
 class PostScreen extends StatefulWidget {
   const PostScreen({
@@ -26,40 +27,35 @@ class _PostScreenState extends State<PostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages'),
-        actions: [
-          IconButton(
-            onPressed: _refreshPosts,
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
+        title: const Text('Updates'),
       ),
-      body: FutureBuilder<List<Message>>(
-        future: widget.postController.fetchMessages(),
+      body: FutureBuilder<List<Updates>>(
+        future: widget.postController.fetchUpdates(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
+
+          final dataIsEmpty = snapshot.hasData && snapshot.data!.isEmpty;
+          if (snapshot.hasError || dataIsEmpty) {
+            Widget textWidget = Text('Error: ${snapshot.error}');
+            if (dataIsEmpty) {
+              textWidget = const Text('No messages yet');
+            }
+
             return Center(
               child: Column(
                 children: [
-                  Text('Error: ${snapshot.error}'),
+                  textWidget,
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _refreshPosts,
-                    child: const Text('Refresh'),
-                  ),
+                  RefreshButton(onTap: _refreshPosts),
                 ],
               ),
             );
           }
+
           if (snapshot.hasData) {
-            if (snapshot.data!.isEmpty) {
-              return const Center(
-                child: Text('No messages yet'),
-              );
-            }
+            final itemCount = snapshot.data!.length;
 
             return ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
@@ -70,16 +66,38 @@ class _PostScreenState extends State<PostScreen> {
                   PointerDeviceKind.trackpad,
                 },
               ),
-              child: ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final item = snapshot.data![index];
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ListView.builder(
+                    itemCount: itemCount,
+                    itemBuilder: (context, index) {
+                      final item = snapshot.data![index];
 
-                  return ListTile(
-                    title: Text(item.messageText),
-                    subtitle: Text('${item.timestamp}'),
-                  );
-                },
+                      Widget itemWidget = ListTile(
+                        title: Text(item.text),
+                        subtitle: Text(item.chatName),
+                      );
+
+                      if (index == itemCount - 1) {
+                        itemWidget = Padding(
+                          padding: const EdgeInsets.only(bottom: 48),
+                          child: itemWidget,
+                        );
+                      }
+
+                      return itemWidget;
+                    },
+                  ),
+                  Positioned(
+                    bottom: 16,
+                    child: RefreshButton(
+                      onTap: _refreshPosts,
+                      buttonColor: widget.postController.telegram.themeParams.buttonColor,
+                      textColor: widget.postController.telegram.themeParams.buttonTextColor,
+                    ),
+                  ),
+                ],
               ),
             );
           }

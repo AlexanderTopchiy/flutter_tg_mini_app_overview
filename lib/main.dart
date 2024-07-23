@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_tg_mini_app_overview/tg_mini_app.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 void main() async {
+  await dotenv.load(fileName: 'env');
   await _tgNotLoadedWorkaround();
   
   runApp(const TgMiniApp());
